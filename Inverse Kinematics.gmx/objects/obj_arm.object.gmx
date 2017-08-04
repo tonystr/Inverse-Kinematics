@@ -51,7 +51,7 @@ seg_end = noone;
 alarm[0] = 1;
 
 x = room_width/2;
-y = room_height;
+//y = room_height;
 </string>
           </argument>
         </arguments>
