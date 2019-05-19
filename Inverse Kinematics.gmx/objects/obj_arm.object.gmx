@@ -29,12 +29,15 @@
 arm_length = 384;
 arm_width  = 16;
 arm_extent = 0;
+
 seg_amount = 5;
 seg_amount_max = seg_amount*2;
 seg_len = arm_length/seg_amount;
 spd = .1;
 max_spd = (240/room_speed)*2;
 tmo = 8;
+
+collected = 0;
 
 target_item = noone;
 held_item = noone;
@@ -148,28 +151,7 @@ if(alarm[0] &lt; 0) {
             clos_item.y = mouse_y;
         }
     }
-    
-    if(instance_exists(target_item)) { // Collision with item
-        var item = target_item.id;
-        if( seg_end.bx &gt;= item.x-tmo &amp;&amp; 
-            seg_end.bx &lt;= item.x+tmo &amp;&amp;
-            seg_end.by &gt;= item.y-tmo &amp;&amp;
-            seg_end.by &lt;= item.y+tmo ) {
-            
-            var nitem = instance_create(0,0,obj_target);
-                nitem.sprite_index = item.sprite_index;
-                nitem.bxoffset = item.x-seg_end.bx;
-                nitem.byoffset = item.y-seg_end.by;
-                nitem.x = seg_end.bx;
-                nitem.y = seg_end.by;
-                nitem.visible = true;
-                
-            held_item = nitem;
-            
-            with(item) instance_destroy();
-        }
-    }
-    
+     
     if(instance_exists(held_item)) {
         held_item.x = seg_end.bx;
         held_item.y = seg_end.by;
@@ -189,11 +171,12 @@ if(alarm[0] &lt; 0) {
                                 obj_item);*/
                 dest.ping = true;
                 dest.collected++;
+                collected++;
                 with(held_item) instance_destroy();
                 held_item = noone;
                 
                 // Reward
-                arm_length *= 1.003;
+                arm_length *= 1.002;
                 if(seg_amount &lt; seg_amount_max) {
                     //seg_amount++;
                     seg_len = arm_length/seg_amount;
@@ -219,6 +202,24 @@ if(alarm[0] &lt; 0) {
         }
         
     } else if(instance_exists(target_item)) {
+        var item = target_item.id;
+        if( seg_end.bx &gt;= item.bbox_left  &amp;&amp; 
+            seg_end.bx &lt;= item.bbox_right &amp;&amp;
+            seg_end.by &gt;= item.bbox_top   &amp;&amp;
+            seg_end.by &lt;= item.bbox_bottom) { // Collision with item
+            
+            var nitem = instance_create(0,0,obj_target);
+                nitem.sprite_index = item.sprite_index;
+                nitem.bxoffset = item.x-seg_end.bx;
+                nitem.byoffset = item.y-seg_end.by;
+                nitem.x = seg_end.bx;
+                nitem.y = seg_end.by;
+                nitem.visible = true;
+                
+            held_item = nitem;
+            
+            with(item) instance_destroy();
+        }
     
         if(arm_extent == 1) { // Can't reach item, switch item target
             var insn = instance_number(target_item.object_index);
@@ -335,6 +336,8 @@ for(var i = 0; i &lt; seg_amount; i++) {
     
 }
 draw_circle(seg_end.bx, seg_end.by, arm_width/2, true);
+
+draw_text(x+32, clamp(y, 16, room_height-16), string(collected));
 </string>
           </argument>
         </arguments>
